@@ -1,10 +1,11 @@
+import streamlit as st
 import nltk
 from nltk.chat.util import Chat, reflections
 import os
 import requests
 
 # Set your OpenWeatherMap API key here
-os.environ['OPENWEATHERMAP_API_KEY'] = 'your_actual_api_key'
+os.environ['OPENWEATHERMAP_API_KEY'] = 'e205be3d0629e90f431219113346fd12'
 
 # Function to retrieve weather information
 def get_weather(country, city):
@@ -44,7 +45,11 @@ pairs = [
         ["My name is ChatBot", "You can call me ChatBot"]
     ],
     [
-        r"what is the weather in (.*)\?",
+        r"what is the weather",
+        ["Sure, I can help you with that. Please provide the recipient location by country and city."]
+    ],
+    [
+        r"(.*) weather in (.*)",
         [get_weather("\\1", "\\2")]
     ],
     [
@@ -54,16 +59,20 @@ pairs = [
 ]
 
 # Define the chatbot function
-def chat_bot():
-    print("Hi, I'm ChatBot. How can I help you today?")
+def chat_bot(input_message):
     chat = Chat(pairs, reflections)
-    while True:
-        user_input = input("You: ")
-        response = chat.respond(user_input)
-        print("ChatBot:", response)
-        if user_input.lower() == 'exit':
-            break
+    response = chat.respond(input_message)
+    return response
 
-# Main function to start the chatbot
+# Streamlit web application
+def main():
+    st.title("ChatBot with Weather Integration")
+
+    st.sidebar.title("Chat")
+
+    user_input = st.text_input("You:")
+    if st.button("Send"):
+        st.write("ChatBot:", chat_bot(user_input))
+
 if __name__ == "__main__":
-    chat_bot()
+    main()
