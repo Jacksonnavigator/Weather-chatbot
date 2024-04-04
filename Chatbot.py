@@ -34,15 +34,15 @@ def get_weather(country, city):
 pairs = [
     [
         r"hi|hello",
-        ["Hello", "Hi", "Hey"]
+        ["Hello", "Hi there!", "Hey, how can I help you?"]
     ],
     [
         r"how are you ?",
-        ["I'm good, thank you", "I'm doing well"]
+        ["I'm good, thank you. How about you?", "I'm doing well, thanks for asking."]
     ],
     [
         r"what is your name ?",
-        ["My name is ChatBot", "You can call me ChatBot"]
+        ["My name is ChatBot. What's yours?", "You can call me ChatBot. How can I assist you today?"]
     ],
     [
         r"what is the weather",
@@ -54,8 +54,13 @@ pairs = [
     ],
     [
         r"bye",
-        ["Goodbye", "Bye", "See you later"]
-    ]
+        ["Goodbye! Have a great day.", "Bye, see you later!"]
+    ],
+    [
+        r"(.*) news",
+        ["I can fetch the latest news for you. Please specify the topic or category."]
+    ],
+    # Additional conversation patterns and responses can be added here
 ]
 
 # Define the chatbot function
