@@ -25,24 +25,25 @@ def get_weather(country, city):
     if data['cod'] == 200:
         weather_description = data['weather'][0]['description']
         temperature = data['main']['temp']
-        temperature_celsius = temperature - 273.15
-        return f"The weather in {city}, {country} is {weather_description} with a temperature of {temperature_celsius:.2f} degrees Celsius."
+        humidity = data['main']['humidity']
+        wind_speed = data['wind']['speed']
+        return f"The weather in {city}, {country} is {weather_description}. Temperature: {temperature:.2f}°C, Humidity: {humidity}%, Wind Speed: {wind_speed} m/s."
     else:
-        return "Sorry, I couldn't retrieve the weather information for that location."
+        return f"Sorry, I couldn't retrieve the weather information for {city}, {country}."
 
 # Define pattern-response pairs for the chatbot
 pairs = [
     [
         r"hi|hello",
-        ["Hello", "Hi there!", "Hey, how can I help you?"]
+        ["Hello", "Hi", "Hey"]
     ],
     [
         r"how are you ?",
-        ["I'm good, thank you. How about you?", "I'm doing well, thanks for asking."]
+        ["I'm good, thank you", "I'm doing well"]
     ],
     [
         r"what is your name ?",
-        ["My name is ChatBot. What's yours?", "You can call me ChatBot. How can I assist you today?"]
+        ["My name is ChatBot", "You can call me ChatBot"]
     ],
     [
         r"what is the weather",
@@ -54,13 +55,8 @@ pairs = [
     ],
     [
         r"bye",
-        ["Goodbye! Have a great day.", "Bye, see you later!"]
-    ],
-    [
-        r"(.*) news",
-        ["I can fetch the latest news for you. Please specify the topic or category."]
-    ],
-    # Additional conversation patterns and responses can be added here
+        ["Goodbye", "Bye", "See you later"]
+    ]
 ]
 
 # Define the chatbot function
@@ -77,7 +73,10 @@ def main():
 
     user_input = st.text_input("You:")
     if st.button("Send"):
-        st.write("ChatBot:", chat_bot(user_input))
+        if user_input.strip() == "":
+            st.write("Please enter a message.")
+        else:
+            st.write("ChatBot:", chat_bot(user_input))
 
 if __name__ == "__main__":
     main()
