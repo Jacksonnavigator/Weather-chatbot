@@ -50,7 +50,7 @@ pairs = [
     ],
     [
         r"(.*) weather in (.*)",
-        [get_weather("\\1", "\\2")]
+        [lambda country, city: get_weather(city, country)]
     ],
     [
         r"bye",
