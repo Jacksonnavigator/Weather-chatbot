@@ -1,82 +1,49 @@
-import streamlit as st
-import nltk
-from nltk.chat.util import Chat, reflections
-import os
+from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
 import requests
 
-# Set your OpenWeatherMap API key here
-os.environ['OPENWEATHERMAP_API_KEY'] = 'e205be3d0629e90f431219113346fd12'
+# Create a new instance of a ChatBot
+chatbot = ChatBot('WeatherBot')
 
-# Function to retrieve weather information
-def get_weather(country, city):
-    api_key = os.getenv('OPENWEATHERMAP_API_KEY')
-    if not api_key:
-        return "API key not found. Please set the OPENWEATHERMAP_API_KEY environment variable."
+# Create a new trainer for the ChatBot
+trainer = ChatterBotCorpusTrainer(chatbot)
 
-    base_url = f'http://api.openweathermap.org/data/2.5/weather?q={city},{country}&appid={api_key}'
-    try:
-        response = requests.get(base_url)
-        response.raise_for_status()  # Raise an exception for non-200 status codes
-    except requests.exceptions.RequestException as e:
-        return f"An error occurred while fetching weather data: {e}"
+# Train the ChatBot based on the english corpus
+trainer.train('chatterbot.corpus.english')
 
+# Function to fetch weather information
+def get_weather(city):
+    api_key = 'e205be3d0629e90f431219113346fd12'
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
+    response = requests.get(url)
     data = response.json()
-
     if data['cod'] == 200:
-        weather_description = data['weather'][0]['description']
-        temperature = data['main']['temp']
-        humidity = data['main']['humidity']
-        wind_speed = data['wind']['speed']
-        return f"The weather in {city}, {country} is {weather_description}. Temperature: {temperature:.2f}°C, Humidity: {humidity}%, Wind Speed: {wind_speed} m/s."
+        weather_info = {
+            'description': data['weather'][0]['description'],
+            'temperature': data['main']['temp'],
+            'humidity': data['main']['humidity']
+        }
+        return weather_info
     else:
-        return f"Sorry, I couldn't retrieve the weather information for {city}, {country}."
+        return None
 
-# Define pattern-response pairs for the chatbot
-pairs = [
-    [
-        r"hi|hello",
-        ["Hello", "Hi", "Hey"]
-    ],
-    [
-        r"how are you ?",
-        ["I'm good, thank you", "I'm doing well"]
-    ],
-    [
-        r"what is your name ?",
-        ["My name is ChatBot", "You can call me ChatBot"]
-    ],
-    [
-        r"what is the weather",
-        ["Sure, I can help you with that. Please provide the recipient location by country and city."]
-    ],
-    [
-        r"(.*) weather in (.*)",
-        [lambda country, city: get_weather(city, country)]
-    ],
-    [
-        r"bye",
-        ["Goodbye", "Bye", "See you later"]
-    ]
-]
-
-# Define the chatbot function
-def chat_bot(input_message):
-    chat = Chat(pairs, reflections)
-    response = chat.respond(input_message)
+# Function to handle user input
+def handle_input(user_input):
+    if 'weather' in user_input.lower():
+        city = input("Please enter the city name: ")
+        weather_info = get_weather(city)
+        if weather_info:
+            response = f"The weather in {city} is {weather_info['description']} with a temperature of {weather_info['temperature']}°C and humidity of {weather_info['humidity']}%."
+        else:
+            response = "Sorry, I couldn't fetch the weather information for that city."
+    else:
+        response = chatbot.get_response(user_input)
     return response
 
-# Streamlit web application
-def main():
-    st.title("ChatBot with Weather Integration")
-
-    st.sidebar.title("Chat")
-
-    user_input = st.text_input("You:")
-    if st.button("Send"):
-        if user_input.strip() == "":
-            st.write("Please enter a message.")
-        else:
-            st.write("ChatBot:", chat_bot(user_input))
-
-if __name__ == "__main__":
-    main()
+# Example usage
+while True:
+    user_input = input("You: ")
+    if user_input.lower() == 'exit':
+        break
+    response = handle_input(user_input)
+    print("Bot:", response)
